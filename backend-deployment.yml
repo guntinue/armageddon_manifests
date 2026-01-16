@@ -15,7 +15,7 @@ spec:
       containers:
         - name: boot-container
           # Jenkins 파이프라인이 이 부분을 자동으로 수정하게 됩니다. (:latest -> :1, :2 ...)
-          image: guntinue/armageddon-backend:latest
+          image: guntinue/armageddon-backend:16
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
