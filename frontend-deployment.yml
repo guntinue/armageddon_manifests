@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  selector:
+    matchLabels:
+      app: frontend  # [중요] backend(boot)와 겹치지 않게 이름 변경
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: frontend # Selector와 동일하게 변경
+    spec:
+      containers:
+        - name: frontend-container # 컨테이너 이름 변경
+          image: guntinue/armageddon-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80 # [수정] Nginx 기반이라면 보통 80 포트 사용
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service # 서비스 이름 변경
+spec:
+  # [수정] 외부 사용자가 접속할 수 있도록 NodePort 또는 LoadBalancer 사용
+  type: NodePort
+  ports:
+    - port: 80         # 서비스가 노출할 포트 (브라우저 주소창에 칠 포트는 아님)
+      targetPort: 80   # 컨테이너의 실제 포트 (위의 containerPort와 일치)
+      nodePort: 30090  # [선택] 외부 브라우저에서 접속할 포트 (예: http://서버IP:30080)
+      # 주의: 백엔드 노드포트(30080)와 겹치면 안 됨! 얘는 30090 등으로 해야 함.
+  selector:
+    app: frontend # [중요] 위의 Deployment 라벨과 일치시켜야 함
