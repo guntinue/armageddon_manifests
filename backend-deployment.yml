@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  selector:
+    matchLabels:
+      app: boot
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: boot
+    spec:
+      containers:
+        - name: boot-container
+          # Jenkins 파이프라인이 이 부분을 자동으로 수정하게 됩니다. (:latest -> :1, :2 ...)
+          image: guntinue/armageddon-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          # [추가됨] DB 연결을 위한 환경변수 설정
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "mariadb-url"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "mariadb-user"  # 실제 ID 입력 (또는 Secret 사용)
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "mariadb-password"
+              # 실제 비번 입력 (또는 Secret 사용)
+              # 보안을 위해 Secret을 쓴다면 아래 주석 처럼 작성:
+              # valueFrom:
+              #   secretKeyRef:
+              #     name: db-secret
+              #     key: password
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: boot-service
+spec:
+  # [수정] 외부에서 접근 가능하도록 NodePort 변경 (클라우드 환경이면 LoadBalancer 권장)
+  type: NodePort
+  ports:
+    - port: 8080        # 서비스가 노출할 포트
+      targetPort: 8080  # 컨테이너의 실제 포트
+      nodePort: 30080   # [선택] 외부에서 접속할 고정 포트 (30000~32767 사이)
+  selector:
+    app: boot
