@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend-container # 컨테이너 이름 변경
-          image: guntinue/armageddon-frontend:16
+          image: guntinue/armageddon-frontend:25
           imagePullPolicy: Always
           ports:
             - containerPort: 80 # [수정] Nginx 기반이라면 보통 80 포트 사용
